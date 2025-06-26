@@ -25,14 +25,12 @@ const initializeDBAndServer = async () => {
 };
 initializeDBAndServer();
 
-const logger = (request, response, next) => {
-  console.log(request.query);
-  next();
-};
+// const logger = (request, response, next) => {
+//   console.log(request.query);
+//   next();
+// };
 
-//Get Books API
-app.get("/books/", logger, (request, response) => {
-  console.log("Inside get Books API");
+const authenticateToken = (request, response, next) => {
   let jwtToken;
   const authHeader = request.headers["authorization"];
   if (authHeader !== undefined) {
@@ -46,18 +44,24 @@ app.get("/books/", logger, (request, response) => {
       if (error) {
         response.send("Invalid Access Token");
       } else {
-        const getBooksQuery = `
+        next();
+      }
+    });
+  }
+};
+
+//Get Books API
+app.get("/books/", authenticateToken, async (request, response) => {
+  //console.log("Inside get Books API");
+  const getBooksQuery = `
             SELECT
               *
             FROM
              book
             ORDER BY
              book_id;`;
-        const booksArray = await db.all(getBooksQuery);
-        response.send(booksArray);
-      }
-    });
-  }
+  const booksArray = await db.all(getBooksQuery);
+  response.send(booksArray);
 });
 
 //Get Book API
