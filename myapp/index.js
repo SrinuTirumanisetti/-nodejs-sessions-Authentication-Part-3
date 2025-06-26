@@ -25,8 +25,14 @@ const initializeDBAndServer = async () => {
 };
 initializeDBAndServer();
 
+const logger = (request, response, next) => {
+  console.log(request.query);
+  next();
+};
+
 //Get Books API
-app.get("/books/", (request, response) => {
+app.get("/books/", logger, (request, response) => {
+  console.log("Inside get Books API");
   let jwtToken;
   const authHeader = request.headers["authorization"];
   if (authHeader !== undefined) {
@@ -55,9 +61,9 @@ app.get("/books/", (request, response) => {
 });
 
 //Get Book API
-app.get("/books/:bookId/", async(request, response) => {
-    const { bookId } = request.params;
-    const getBookQuery = `
+app.get("/books/:bookId/", async (request, response) => {
+  const { bookId } = request.params;
+  const getBookQuery = `
       SELECT
        *
       FROM
@@ -65,10 +71,9 @@ app.get("/books/:bookId/", async(request, response) => {
       WHERE
        book_id = ${bookId};
     `;
-    const book = await db.get(getBookQuery);
-    response.send(book);
+  const book = await db.get(getBookQuery);
+  response.send(book);
 });
-
 
 //User Register API
 app.post("/users/", async (request, response) => {
